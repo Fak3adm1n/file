@@ -1,122 +1,82 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <title>六爻排盘系统</title>
-  <style>
-    body { font-family: "Microsoft YaHei", sans-serif; padding: 20px; }
-    input, button { margin: 5px; }
-    pre { background: #f4f4f4; padding: 10px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>六十四卦抽卦</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 36px;
+            color: #fff;
+            margin-bottom: 50px;
+        }
+
+        .result {
+            text-align: center;
+            font-size: 48px;
+            margin-bottom: 40px;
+        }
+
+        .button {
+            padding: 15px 30px;
+            background-color: #fff;
+            color: #000;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background-color: #ccc;
+        }
+    </style>
 </head>
 <body>
-  <h1>六爻排盘系统</h1>
-  <label>起卦日期时间：
-    <input type="datetime-local" id="datetime">
-  </label>
-  <button onclick="generate()">排盘</button>
 
-  <pre id="output"></pre>
+    <h1>六十四卦 随机抽卦</h1>
+    <div class="result" id="result">
+        <!-- 结果将显示在这里 -->
+    </div>
+    <button class="button" onclick="drawHexagram()">抽卦</button>
 
-  <script>
-    const trigrams = {
-      '111': '乾', '000': '坤', '001': '震', '100': '巽',
-      '010': '坎', '101': '离', '011': '艮', '110': '兑'
-    };
+    <script>
+        const hexagrams = [
+            "乾為天", "天地否", "天澤履", "天山遯", "天火同人", "天水訟", "天雷无妄", "天風姤",
+            "地天泰", "坤為地", "地澤臨", "地山謙", "地火明夷", "地水師", "地雷復", "地風升",
+            "澤天夬", "澤地萃", "兌為澤", "澤山咸", "澤火革", "澤水困", "澤雷隨", "澤風大過",
+            "山天大畜", "山地剝", "山澤損", "艮為山", "山火賁", "山水蒙", "山雷頤", "山風蠱",
+            "火天大有", "火地晉", "火澤睽", "火山旅", "離為火", "火水未濟", "火雷噬嗑", "火風鼎",
+            "水天需", "水地比", "水澤節", "水山蹇", "水火既濟", "坎為水", "水雷屯", "水風井",
+            "雷天大壯", "雷地豫", "雷澤歸妹", "雷山小過", "雷火豐", "雷水解", "震為雷", "雷風恒",
+            "風天小畜", "風地觀", "風澤中孚", "風山漸", "風火家人", "風水渙", "風雷益", "巽為風"
+        ];
 
-    const hexagramNames = {
-      '乾乾': '乾为天', '兑乾': '天泽履', '离乾': '天火同人', '震乾': '天雷无妄',
-      '巽乾': '天风姤', '坎乾': '天水讼', '艮乾': '天山遁', '坤乾': '天地否',
-      '乾兑': '泽天夬', '兑兑': '兑为泽', '离兑': '火泽睽', '震兑': '雷泽归妹',
-      '巽兑': '风泽中孚', '坎兑': '水泽节', '艮兑': '山泽损', '坤兑': '地泽临',
-      '乾离': '火天大有', '兑离': '火泽睽', '离离': '离为火', '震离': '雷火丰',
-      '巽离': '风火家人', '坎离': '水火既济', '艮离': '山火贲', '坤离': '地火明夷',
-      '乾震': '雷天大壮', '兑震': '雷泽归妹', '离震': '雷火丰', '震震': '震为雷',
-      '巽震': '风雷益', '坎震': '水雷屯', '艮震': '山雷颐', '坤震': '地雷复',
-      '乾巽': '风天小畜', '兑巽': '风泽中孚', '离巽': '风火家人', '震巽': '风雷益',
-      '巽巽': '巽为风', '坎巽': '水风井', '艮巽': '山风蛊', '坤巽': '地风升',
-      '乾坎': '水天需', '兑坎': '水泽节', '离坎': '水火既济', '震坎': '水雷屯',
-      '巽坎': '水风井', '坎坎': '坎为水', '艮坎': '山水蒙', '坤坎': '地水师',
-      '乾艮': '山天大畜', '兑艮': '山泽损', '离艮': '山火贲', '震艮': '山雷颐',
-      '巽艮': '山风蛊', '坎艮': '山水蒙', '艮艮': '艮为山', '坤艮': '地山谦',
-      '乾坤': '天地否', '兑坤': '地泽临', '离坤': '地火明夷', '震坤': '地雷复',
-      '巽坤': '地风升', '坎坤': '地水师', '艮坤': '地山谦', '坤坤': '坤为地'
-    };
+        function drawHexagram() {
+            const randomIndex = Math.floor(Math.random() * hexagrams.length);
+            const hexagram = hexagrams[randomIndex];
 
-    const naJiaTable = {
-      '乾': ['甲子', '甲戌', '甲申', '甲午', '甲辰', '甲寅'],
-      '兑': ['丁未', '丁巳', '丁卯', '丁丑', '丁亥', '丁酉'],
-      '离': ['己巳', '己卯', '己丑', '己亥', '己酉', '己未'],
-      '震': ['庚子', '庚戌', '庚申', '庚午', '庚辰', '庚寅'],
-      '巽': ['辛巳', '辛卯', '辛丑', '辛亥', '辛酉', '辛未'],
-      '坎': ['壬子', '壬戌', '壬申', '壬午', '壬辰', '壬寅'],
-      '艮': ['丙寅', '丙子', '丙戌', '丙申', '丙午', '丙辰'],
-      '坤': ['乙未', '乙巳', '乙卯', '乙丑', '乙亥', '乙酉']
-    };
+            // 显示抽取结果
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <h2>${hexagram}</h2>
+            `;
+        }
+    </script>
 
-    const fiveElementMap = {
-      '甲': '木', '乙': '木',
-      '丙': '火', '丁': '火',
-      '戊': '土', '己': '土',
-      '庚': '金', '辛': '金',
-      '壬': '水', '癸': '水'
-    };
-
-    const relationMap = {
-      '生我': '父母', '同我': '兄弟',
-      '我生': '子孙', '我克': '妻财',
-      '克我': '官鬼'
-    };
-
-    function getDayGanZhi(date) {
-      const base = new Date(1900, 0, 1);
-      const days = Math.floor((date - base) / (1000 * 60 * 60 * 24));
-      const gan = "甲乙丙丁戊己庚辛壬癸"[ (days + 10) % 10 ];
-      const zhi = "子丑寅卯辰巳午未申酉戌亥"[ (days + 12) % 12 ];
-      return gan + zhi;
-    }
-
-    function getRelation(me, other) {
-      const cycle = ['木', '火', '土', '金', '水'];
-      const a = cycle.indexOf(fiveElementMap[me]);
-      const b = cycle.indexOf(fiveElementMap[other]);
-      if (a === b) return '兄弟';
-      if ((a + 1) % 5 === b) return '子孙';
-      if ((a + 2) % 5 === b) return '妻财';
-      if ((b + 1) % 5 === a) return '父母';
-      if ((b + 2) % 5 === a) return '官鬼';
-      return '？';
-    }
-
-    function generate() {
-      const dt = new Date(document.getElementById("datetime").value);
-      const total = dt.getFullYear().toString().split('').map(Number)
-        .concat(dt.getMonth() + 1, dt.getDate(), dt.getHours())
-        .reduce((a, b) => a + b, 0);
-
-      const trigramKeys = Object.keys(trigrams);
-      const upperKey = trigramKeys[total % 8];
-      const lowerKey = trigramKeys[(total + 3) % 8];
-      const upper = trigrams[upperKey];
-      const lower = trigrams[lowerKey];
-      const hexName = hexagramNames[upper + lower] || '未知卦';
-      const naJia = naJiaTable[lower];
-      const dayGanZhi = getDayGanZhi(dt);
-      const gan = dayGanZhi[0];
-
-      let output = `【六爻排盘结果】
-卦象：${hexName}（${upper + lower}）
-动爻：第${(total % 6) + 1}爻
-日干支：${dayGanZhi}
-纳甲：\n`;
-
-      naJia.forEach((gs, i) => {
-        const relation = getRelation(gan, gs[0]);
-        output += `第${i + 1}爻：${gs}（${relation}）\n`;
-      });
-
-      document.getElementById("output").innerText = output;
-    }
-  </script>
 </body>
 </html>
